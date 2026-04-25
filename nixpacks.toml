@@ -1,9 +1,8 @@
 [phases.setup]
 nixPkgs = ["nodejs_20"]
-nixOverlays = []
 
 [phases.install]
-cmds = ["npm ci --no-audit --no-fund --no-cache"]
+cmds = ["npm ci --no-audit --no-fund"]
 cacheDirectories = []
 
 [phases.build]
@@ -11,4 +10,4 @@ cmds = ["npm run build"]
 cacheDirectories = []
 
 [start]
-cmd = "npm run start"
+cmd = "npx next start -p $PORT"
