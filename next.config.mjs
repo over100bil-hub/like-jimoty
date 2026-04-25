@@ -9,8 +9,6 @@ const nextConfig = {
       },
     ],
   },
-  // Railway / Docker 互換
-  output: "standalone",
 };
 
 export default nextConfig;
