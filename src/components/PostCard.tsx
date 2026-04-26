@@ -4,10 +4,19 @@ import type { Post } from "@/types";
 import FavoriteButton from "./FavoriteButton";
 import { formatPrice } from "@/lib/utils";
 
-export default function PostCard({ post }: { post: Post }) {
+export default function PostCard({
+  post,
+  prefSlug,
+}: {
+  post: Post;
+  prefSlug?: string;
+}) {
   const cover = post.images?.[0];
+  const href = prefSlug
+    ? `/${prefSlug}/posts/${post.id}`
+    : `/posts/${post.id}`;
   return (
-    <Link href={`/posts/${post.id}`} className="group block">
+    <Link href={href} className="group block">
       <div className="relative aspect-[4/3] overflow-hidden rounded-card bg-surface">
         {cover ? (
           <Image

@@ -101,10 +101,28 @@ export default function Header() {
     const params = new URLSearchParams(sp.toString());
     if (q) params.set("q", q);
     else params.delete("q");
-    router.push(`/?${params.toString()}`);
+    const target = pathname.startsWith("/") && pathname.split("/")[1]
+      ? `/${pathname.split("/")[1]}`
+      : "/";
+    const qs = params.toString();
+    router.push(qs ? `${target}?${qs}` : target);
   };
 
   const isHome = pathname === "/";
+
+  // パス先頭のセグメントが都道府県slug（小文字英字のみ）ならprefとして抽出
+  const PREF_SLUGS = new Set([
+    "hokkaido","aomori","iwate","miyagi","akita","yamagata","fukushima",
+    "ibaraki","tochigi","gunma","saitama","chiba","tokyo","kanagawa",
+    "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu","shizuoka","aichi",
+    "mie","shiga","kyoto","osaka","hyogo","nara","wakayama",
+    "tottori","shimane","okayama","hiroshima","yamaguchi",
+    "tokushima","kagawa","ehime","kochi",
+    "fukuoka","saga","nagasaki","kumamoto","oita","miyazaki","kagoshima","okinawa",
+  ]);
+  const firstSeg = pathname.split("/").filter(Boolean)[0];
+  const prefSlug = firstSeg && PREF_SLUGS.has(firstSeg) ? firstSeg : undefined;
+  const homePath = prefSlug ? `/${prefSlug}` : "/";
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-line">
@@ -112,7 +130,7 @@ export default function Header() {
         <div className="h-16 sm:h-20 flex items-center justify-between gap-3">
           {/* ロゴ */}
           <Link
-            href="/"
+            href={homePath}
             className="flex items-center gap-1.5 text-accent font-extrabold text-2xl tracking-tight shrink-0"
           >
             <svg
@@ -162,8 +180,20 @@ export default function Header() {
           {/* 右ナビ */}
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <div className="hidden sm:block">
-              <PostCTA variant="compact" />
+              <PostCTA variant="compact" prefSlug={prefSlug} />
             </div>
+            {prefSlug && (
+              <Link
+                href="/"
+                className="hidden md:inline-flex items-center gap-1 text-xs font-semibold text-sub hover:text-accent px-2 py-1 rounded-pill border border-line hover:border-accent transition"
+                title="地域を変更"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
+                </svg>
+                地域を変更
+              </Link>
+            )}
 
             {/* メニュー */}
             <div className="relative">
@@ -233,7 +263,7 @@ export default function Header() {
                           プロフィール編集
                         </MenuLink>
                         <MenuLink
-                          href="/posts/new"
+                          href={prefSlug ? `/${prefSlug}/posts/new` : "/posts/new"}
                           onClick={() => setMenuOpen(false)}
                         >
                           出品する
@@ -273,7 +303,7 @@ export default function Header() {
                         </MenuLink>
                         <div className="border-t border-line my-1" />
                         <MenuLink
-                          href="/posts/new"
+                          href={prefSlug ? `/${prefSlug}/posts/new` : "/posts/new"}
                           onClick={() => setMenuOpen(false)}
                         >
                           出品する

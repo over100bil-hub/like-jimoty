@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 type Props = {
   variant?: "primary" | "fab" | "compact";
   className?: string;
+  prefSlug?: string;
 };
 
 const OPTIONS: { type: string; label: string; icon: string }[] = [
@@ -22,7 +23,11 @@ const OPTIONS: { type: string; label: string; icon: string }[] = [
   { type: "localshop", label: "地元のお店", icon: "🏪" },
 ];
 
-export default function PostCTA({ variant = "primary", className = "" }: Props) {
+export default function PostCTA({
+  variant = "primary",
+  className = "",
+  prefSlug,
+}: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -37,7 +42,12 @@ export default function PostCTA({ variant = "primary", className = "" }: Props) 
 
   const go = (type: string) => {
     setOpen(false);
-    router.push(`/posts/new?type=${type}`);
+    if (!prefSlug) {
+      // 都道府県未選択時はトップへ誘導（pref選択を強制）
+      router.push(`/?next=${encodeURIComponent(`/posts/new?type=${type}`)}`);
+      return;
+    }
+    router.push(`/${prefSlug}/posts/new?type=${type}`);
   };
 
   const buttonCls =

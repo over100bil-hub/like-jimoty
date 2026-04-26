@@ -4,9 +4,12 @@ import CategoryIcon from "./CategoryIcon";
 
 export default function CategoryFullList({
   categories,
+  prefSlug,
 }: {
   categories: Category[];
+  prefSlug?: string;
 }) {
+  const basePath = prefSlug ? `/${prefSlug}` : "/";
   const parents = categories
     .filter((c) => !c.parent_id)
     .sort((a, b) => a.sort_order - b.sort_order);
@@ -57,7 +60,7 @@ export default function CategoryFullList({
               <div className="bg-surface px-4 py-3">
                 <div className="grid grid-cols-2 gap-x-3 gap-y-2">
                   <Link
-                    href={`/?category=${p.slug}`}
+                    href={`${basePath}?category=${p.slug}`}
                     className="text-xs font-semibold text-accent hover:underline col-span-2 mb-1"
                   >
                     {p.name}すべて →
@@ -65,7 +68,7 @@ export default function CategoryFullList({
                   {children.map((c) => (
                     <Link
                       key={c.id}
-                      href={`/?category=${c.slug}`}
+                      href={`${basePath}?category=${c.slug}`}
                       className="text-xs text-ink hover:text-accent transition py-1"
                     >
                       ・{c.name}

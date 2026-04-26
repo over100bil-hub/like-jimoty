@@ -23,6 +23,8 @@ export type Prefecture = {
   id: number;
   name: string;
   sort_order: number;
+  slug: string;
+  region?: string | null;
 };
 
 export type DealType = "sell" | "give" | "wanted";

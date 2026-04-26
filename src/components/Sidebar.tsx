@@ -3,9 +3,13 @@ import type { Announcement } from "@/types";
 
 export default function Sidebar({
   announcements,
+  prefSlug,
 }: {
   announcements: Announcement[];
+  prefSlug?: string;
 }) {
+  const newPath = (deal: string) =>
+    prefSlug ? `/${prefSlug}/posts/new?deal=${deal}` : `/posts/new?deal=${deal}`;
   return (
     <aside className="space-y-6">
       {/* お知らせ */}
@@ -59,9 +63,9 @@ export default function Sidebar({
           <h3 className="font-bold text-sm">投稿・取引ガイド</h3>
         </header>
         <ul className="divide-y divide-line">
-          <GuideLink href="/posts/new?deal=sell" icon="💴" title="売ります" sub="値段をつけて出品する方法" />
-          <GuideLink href="/posts/new?deal=give" icon="🎁" title="あげます" sub="無料でお譲りする方法" />
-          <GuideLink href="/posts/new?deal=wanted" icon="🙋" title="求む" sub="欲しいものを募集する" />
+          <GuideLink href={newPath("sell")} icon="💴" title="売ります" sub="値段をつけて出品する方法" />
+          <GuideLink href={newPath("give")} icon="🎁" title="あげます" sub="無料でお譲りする方法" />
+          <GuideLink href={newPath("wanted")} icon="🙋" title="求む" sub="欲しいものを募集する" />
           <GuideLink href="/about" icon="📘" title="サービス紹介" sub="marcheの使い方" />
           <GuideLink href="/terms" icon="🛡️" title="利用規約" sub="安全に使うために" />
           <GuideLink href="/contact" icon="💬" title="お問い合わせ" sub="サポートに連絡する" />

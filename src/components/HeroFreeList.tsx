@@ -1,8 +1,17 @@
 import Link from "next/link";
 import type { Post } from "@/types";
 
-export default function HeroFreeList({ posts }: { posts: Post[] }) {
+export default function HeroFreeList({
+  posts,
+  prefSlug,
+}: {
+  posts: Post[];
+  prefSlug?: string;
+}) {
   if (posts.length === 0) return null;
+  const basePath = prefSlug ? `/${prefSlug}` : "";
+  const postPath = (id: string) =>
+    prefSlug ? `/${prefSlug}/posts/${id}` : `/posts/${id}`;
 
   return (
     <section className="bg-gradient-to-br from-accent-soft to-white border-b border-line">
@@ -15,7 +24,7 @@ export default function HeroFreeList({ posts }: { posts: Post[] }) {
             <span className="text-ink">あげます・お譲りします（新着）</span>
           </h2>
           <Link
-            href="/?deal=give"
+            href={`${basePath}?deal=give`}
             className="text-xs sm:text-sm font-semibold text-accent hover:underline"
           >
             すべて見る →
@@ -25,7 +34,7 @@ export default function HeroFreeList({ posts }: { posts: Post[] }) {
           {posts.map((p) => (
             <Link
               key={p.id}
-              href={`/posts/${p.id}`}
+              href={postPath(p.id)}
               className="shrink-0 w-32 sm:w-40 group"
             >
               <div className="aspect-square rounded-card overflow-hidden bg-white border border-line shadow-airbnb relative">

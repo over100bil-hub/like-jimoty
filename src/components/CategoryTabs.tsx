@@ -7,12 +7,15 @@ import CategoryIcon from "./CategoryIcon";
 
 export default function CategoryTabs({
   categories,
+  prefSlug,
 }: {
   categories: Category[];
+  prefSlug?: string;
 }) {
   const router = useRouter();
   const sp = useSearchParams();
   const current = sp.get("category");
+  const basePath = prefSlug ? `/${prefSlug}` : "/";
 
   const [openParent, setOpenParent] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
@@ -68,7 +71,8 @@ export default function CategoryTabs({
     const params = new URLSearchParams(sp.toString());
     if (slug) params.set("category", slug);
     else params.delete("category");
-    router.push(`/?${params.toString()}`);
+    const qs = params.toString();
+    router.push(qs ? `${basePath}?${qs}` : basePath);
   };
 
   const toggleDrawer = (parent: Category) => {

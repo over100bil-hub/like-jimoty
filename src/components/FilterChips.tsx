@@ -1,16 +1,19 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import type { Prefecture } from "@/types";
 
 export default function FilterChips({
   prefectures,
+  hidePrefecture = false,
 }: {
   prefectures: Prefecture[];
+  hidePrefecture?: boolean;
 }) {
   const router = useRouter();
   const sp = useSearchParams();
+  const pathname = usePathname();
   const [openPref, setOpenPref] = useState(false);
   const [openPrice, setOpenPrice] = useState(false);
   const [openDeal, setOpenDeal] = useState(false);
@@ -21,13 +24,15 @@ export default function FilterChips({
       if (v === null || v === "") params.delete(k);
       else params.set(k, v);
     }
-    router.push(`/?${params.toString()}`);
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
-  const reset = () => router.push("/");
-  const isFiltered = ["q", "category", "prefecture", "deal", "min", "max"].some(
-    (k) => sp.get(k)
-  );
+  const reset = () => router.push(pathname);
+  const filterKeys = hidePrefecture
+    ? ["q", "category", "deal", "min", "max"]
+    : ["q", "category", "prefecture", "deal", "min", "max"];
+  const isFiltered = filterKeys.some((k) => sp.get(k));
 
   const prefName =
     prefectures.find((p) => String(p.id) === sp.get("prefecture"))?.name ?? null;
@@ -35,11 +40,13 @@ export default function FilterChips({
   return (
     <div className="border-b border-line">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex items-center gap-2 scroll-x">
-        <FilterPill
-          label={prefName ?? "エリア"}
-          active={!!prefName}
-          onClick={() => setOpenPref(true)}
-        />
+        {!hidePrefecture && (
+          <FilterPill
+            label={prefName ?? "エリア"}
+            active={!!prefName}
+            onClick={() => setOpenPref(true)}
+          />
+        )}
         <FilterPill
           label={
             sp.get("deal") === "give"
