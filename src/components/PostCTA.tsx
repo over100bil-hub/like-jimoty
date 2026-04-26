@@ -8,10 +8,18 @@ type Props = {
   className?: string;
 };
 
-const OPTIONS: { value: "sell" | "give" | "wanted"; label: string; sub: string; icon: string }[] = [
-  { value: "sell", label: "売ります", sub: "値段をつけて出品", icon: "💴" },
-  { value: "give", label: "あげます", sub: "無料でお譲り", icon: "🎁" },
-  { value: "wanted", label: "求む", sub: "欲しいものを募集", icon: "🙋" },
+const OPTIONS: { type: string; label: string; icon: string }[] = [
+  { type: "sell-give", label: "売ります・あげます", icon: "🏷️" },
+  { type: "vehicles", label: "中古車", icon: "🚗" },
+  { type: "foster", label: "里親募集", icon: "🐶" },
+  { type: "members", label: "メンバー募集", icon: "👥" },
+  { type: "community", label: "助け合い", icon: "🤝" },
+  { type: "jobs-parttime", label: "アルバイト", icon: "💼" },
+  { type: "jobs-fulltime", label: "正社員", icon: "🧑‍💼" },
+  { type: "lesson", label: "教室・スクール", icon: "🎓" },
+  { type: "events", label: "イベント", icon: "🎉" },
+  { type: "realestate", label: "不動産", icon: "🏠" },
+  { type: "localshop", label: "地元のお店", icon: "🏪" },
 ];
 
 export default function PostCTA({ variant = "primary", className = "" }: Props) {
@@ -27,9 +35,9 @@ export default function PostCTA({ variant = "primary", className = "" }: Props) 
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  const go = (deal: string) => {
+  const go = (type: string) => {
     setOpen(false);
-    router.push(`/posts/new?deal=${deal}`);
+    router.push(`/posts/new?type=${type}`);
   };
 
   const buttonCls =
@@ -75,21 +83,22 @@ export default function PostCTA({ variant = "primary", className = "" }: Props) 
         <div
           role="menu"
           className={`absolute z-50 ${
-            variant === "fab" ? "bottom-full mb-2 right-0" : "top-full mt-2 right-0"
-          } w-64 bg-white rounded-xl shadow-airbnbLg border border-line overflow-hidden`}
+            variant === "fab"
+              ? "bottom-full mb-2 right-0"
+              : "top-full mt-2 right-0"
+          } w-64 bg-white rounded-xl shadow-airbnbLg border border-line overflow-hidden max-h-[70vh] overflow-y-auto`}
         >
           {OPTIONS.map((o) => (
             <button
-              key={o.value}
+              key={o.type}
               type="button"
               role="menuitem"
-              onClick={() => go(o.value)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent-soft transition"
+              onClick={() => go(o.type)}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-accent-soft transition border-b border-line last:border-b-0"
             >
-              <span className="text-2xl">{o.icon}</span>
-              <span className="flex-1">
-                <span className="block font-bold text-ink">{o.label}</span>
-                <span className="block text-xs text-sub">{o.sub}</span>
+              <span className="text-xl shrink-0">{o.icon}</span>
+              <span className="flex-1 text-sm font-semibold text-ink">
+                {o.label}
               </span>
               <svg
                 width="14"

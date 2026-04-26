@@ -13,6 +13,7 @@ type Props = {
   userEmail: string;
   post?: Post;
   initialDeal?: DealType;
+  initialCategoryId?: number;
 };
 
 const CONDITIONS = ["新品・未使用", "未使用に近い", "目立った傷や汚れなし", "やや傷や汚れあり", "傷や汚れあり"];
@@ -24,6 +25,7 @@ export default function PostForm({
   userEmail,
   post,
   initialDeal,
+  initialCategoryId,
 }: Props) {
   const isEdit = !!post;
   const router = useRouter();
@@ -32,7 +34,7 @@ export default function PostForm({
   const [title, setTitle] = useState(post?.title ?? "");
   const [description, setDescription] = useState(post?.description ?? "");
   const [categoryId, setCategoryId] = useState(
-    post?.category_id?.toString() ?? ""
+    post?.category_id?.toString() ?? initialCategoryId?.toString() ?? ""
   );
   const [prefectureId, setPrefectureId] = useState(
     post?.prefecture_id?.toString() ?? ""
