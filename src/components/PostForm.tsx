@@ -12,6 +12,7 @@ type Props = {
   userId: string;
   userEmail: string;
   post?: Post;
+  initialDeal?: DealType;
 };
 
 const CONDITIONS = ["新品・未使用", "未使用に近い", "目立った傷や汚れなし", "やや傷や汚れあり", "傷や汚れあり"];
@@ -22,6 +23,7 @@ export default function PostForm({
   userId,
   userEmail,
   post,
+  initialDeal,
 }: Props) {
   const isEdit = !!post;
   const router = useRouter();
@@ -39,7 +41,9 @@ export default function PostForm({
   const [contactEmail, setContactEmail] = useState(
     post?.contact_email ?? userEmail ?? ""
   );
-  const [dealType, setDealType] = useState<DealType>(post?.deal_type ?? "sell");
+  const [dealType, setDealType] = useState<DealType>(
+    post?.deal_type ?? initialDeal ?? "sell"
+  );
   const [condition, setCondition] = useState<string>(post?.condition ?? "");
 
   const [existingImages, setExistingImages] = useState<string[]>(

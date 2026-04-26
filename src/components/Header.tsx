@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import PostCTA from "./PostCTA";
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -140,7 +141,7 @@ export default function Header() {
             />
             <button
               type="submit"
-              className="bg-accent hover:bg-accent-hover text-white rounded-full p-2.5 transition-colors"
+              className="bg-gradient-brand hover:opacity-90 text-white rounded-full p-2.5 transition-opacity"
               aria-label="検索"
             >
               <svg
@@ -160,12 +161,9 @@ export default function Header() {
 
           {/* 右ナビ */}
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            <Link
-              href="/posts/new"
-              className="hidden sm:inline-flex items-center text-sm font-semibold px-4 py-2.5 rounded-pill hover:bg-surface transition-colors"
-            >
-              出品する
-            </Link>
+            <div className="hidden sm:block">
+              <PostCTA variant="compact" />
+            </div>
 
             {/* メニュー */}
             <div className="relative">

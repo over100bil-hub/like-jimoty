@@ -5,6 +5,18 @@ export type Category = {
   sort_order: number;
   parent_id?: number | null;
   icon?: string | null;
+  is_popular?: boolean | null;
+  popular_order?: number | null;
+};
+
+export type Announcement = {
+  id: number;
+  title: string;
+  body: string | null;
+  url: string | null;
+  is_published: boolean;
+  published_at: string;
+  created_at: string;
 };
 
 export type Prefecture = {

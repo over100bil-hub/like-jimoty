@@ -1,10 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
-import type { Post, Category, Prefecture } from "@/types";
+import type { Post, Category, Prefecture, Announcement } from "@/types";
 import CategoryTabs from "@/components/CategoryTabs";
 import FilterChips from "@/components/FilterChips";
 import PostCard from "@/components/PostCard";
+import HeroFreeList from "@/components/HeroFreeList";
+import CategoryFullList from "@/components/CategoryFullList";
+import Sidebar from "@/components/Sidebar";
+import PostCTA from "@/components/PostCTA";
 
 export const revalidate = 30;
 
@@ -25,18 +29,40 @@ export default async function HomePage({
   const params = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: categoriesRaw }, { data: prefecturesRaw }] = await Promise.all(
-    [
-      supabase.from("categories").select("*").order("sort_order"),
-      supabase.from("prefectures").select("*").order("sort_order"),
-    ]
-  );
+  const [
+    { data: categoriesRaw },
+    { data: prefecturesRaw },
+    { data: announcementsRaw },
+    { data: freePostsRaw },
+  ] = await Promise.all([
+    supabase.from("categories").select("*").order("sort_order"),
+    supabase.from("prefectures").select("*").order("sort_order"),
+    supabase
+      .from("announcements")
+      .select("*")
+      .eq("is_published", true)
+      .order("published_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("posts")
+      .select(
+        "*, categories(name,slug), prefectures(name), profiles(nickname,avatar_url)"
+      )
+      .eq("status", "active")
+      .eq("deal_type", "give")
+      .order("created_at", { ascending: false })
+      .limit(10),
+  ]);
   const categories = (categoriesRaw as Category[]) ?? [];
   const prefectures = (prefecturesRaw as Prefecture[]) ?? [];
+  const announcements = (announcementsRaw as Announcement[]) ?? [];
+  const freePosts = (freePostsRaw as Post[]) ?? [];
 
   let query = supabase
     .from("posts")
-    .select("*, categories(name,slug), prefectures(name), profiles(nickname,avatar_url)")
+    .select(
+      "*, categories(name,slug), prefectures(name), profiles(nickname,avatar_url)"
+    )
     .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(60);
@@ -76,9 +102,15 @@ export default async function HomePage({
 
   return (
     <>
-      <Suspense fallback={<div className="h-16 border-b border-line" />}>
+      <Suspense fallback={<div className="h-32 border-b border-line" />}>
         <CategoryTabs categories={categories} />
       </Suspense>
+
+      {/* 無料で譲ります 新着 */}
+      {!params.category && !params.q && !params.deal && (
+        <HeroFreeList posts={freePosts} />
+      )}
+
       <Suspense fallback={<div className="h-14 border-b border-line" />}>
         <FilterChips prefectures={prefectures} />
       </Suspense>
@@ -95,16 +127,24 @@ export default async function HomePage({
         )}
       </div>
 
-      {/* mobile fab */}
-      <Link
-        href="/posts/new"
-        className="sm:hidden fixed bottom-5 right-5 z-30 bg-accent hover:bg-accent-hover text-white font-semibold pl-5 pr-6 py-3.5 rounded-pill shadow-airbnbLg flex items-center gap-2"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 5v14M5 12h14" stroke="white" strokeWidth="3" strokeLinecap="round" />
-        </svg>
-        出品する
-      </Link>
+      {/* 下部: カテゴリ全一覧 ＋ サイドバー */}
+      <div className="border-t border-line bg-surface/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="lg:col-span-2">
+              <CategoryFullList categories={categories} />
+            </div>
+            <div>
+              <Sidebar announcements={announcements} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* mobile fab: 投稿プルダウン */}
+      <div className="sm:hidden fixed bottom-5 right-5 z-30">
+        <PostCTA variant="fab" />
+      </div>
     </>
   );
 }
@@ -115,10 +155,7 @@ function EmptyState() {
       <div className="text-5xl mb-3">🔍</div>
       <h2 className="text-xl font-bold mb-2">該当する投稿が見つかりません</h2>
       <p className="text-sub mb-6">条件を変えて検索してみてください</p>
-      <Link
-        href="/"
-        className="inline-block btn-outline"
-      >
+      <Link href="/" className="inline-block btn-brand-outline">
         条件をリセット
       </Link>
     </div>

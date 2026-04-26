@@ -18,7 +18,12 @@ const config: Config = {
           DEFAULT: "var(--color-accent)",
           hover: "var(--color-accent-hover)",
           soft: "var(--color-accent-soft)",
+          2: "var(--color-accent-2)",
         },
+      },
+      backgroundImage: {
+        "gradient-brand": "var(--gradient-brand)",
+        "gradient-brand-hover": "var(--gradient-brand-hover)",
       },
       borderRadius: {
         card: "16px",

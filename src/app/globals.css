@@ -4,16 +4,20 @@
 
 :root {
   --color-bg: #ffffff;
-  --color-surface: #f7f7f7;
+  --color-surface: #fff7f1;
   --color-text: #222222;
   --color-text-sub: #717171;
-  --color-border: #dddddd;
-  --color-accent: #ff385c;
-  --color-accent-hover: #e31c5f;
-  --color-accent-soft: #fff0f3;
+  --color-border: #f0d9c8;
+  --color-accent: #ff7a1a;
+  --color-accent-2: #ff3d8a;
+  --color-accent-hover: #e8650f;
+  --color-accent-soft: #fff1e6;
   --color-success: #008a05;
+  --gradient-brand: linear-gradient(135deg, #ff8a3d 0%, #ff5c8a 100%);
+  --gradient-brand-hover: linear-gradient(135deg, #f57625 0%, #e84478 100%);
   --color-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
   --color-shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.1);
+  --shadow-brand: 0 6px 18px rgba(255, 90, 80, 0.25);
   --radius-card: 16px;
   --radius-pill: 999px;
   --font-base: "Circular", "Inter", "Helvetica Neue", "Hiragino Sans",
@@ -51,15 +55,17 @@
 
 @layer components {
   .btn-primary {
-    background: var(--color-accent);
+    background: var(--gradient-brand);
     color: #fff;
     border-radius: 12px;
     padding: 12px 20px;
     font-weight: 600;
-    transition: background 0.15s ease, transform 0.1s ease;
+    box-shadow: var(--shadow-brand);
+    transition: filter 0.15s ease, transform 0.1s ease;
   }
   .btn-primary:hover {
-    background: var(--color-accent-hover);
+    filter: brightness(0.96);
+    background: var(--gradient-brand-hover);
   }
   .btn-primary:active {
     transform: scale(0.98);
@@ -67,6 +73,25 @@
   .btn-primary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+  .btn-brand-outline {
+    border: 1.5px solid transparent;
+    background: linear-gradient(#fff, #fff) padding-box,
+      var(--gradient-brand) border-box;
+    color: var(--color-accent);
+    border-radius: 12px;
+    padding: 11px 20px;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+  .text-gradient {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .bg-gradient-brand {
+    background: var(--gradient-brand);
   }
   .btn-outline {
     border: 1px solid var(--color-text);
