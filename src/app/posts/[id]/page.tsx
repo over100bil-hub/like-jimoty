@@ -8,12 +8,18 @@ import ContactSection from "./ContactSection";
 import ImageGallery from "./ImageGallery";
 import FavoriteButton from "@/components/FavoriteButton";
 import type { Post, Category } from "@/types";
-import { formatPrice, formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime } from "@/lib/utils";
 import {
   getCategoryFields,
   resolveTopCategorySlug,
   fieldValueToLabel,
 } from "@/lib/categoryFields";
+import {
+  getDisplayKind,
+  priceLabel,
+  priceSubText,
+  shouldShowDealRow,
+} from "@/lib/postDisplay";
 
 export const revalidate = 0;
 
@@ -93,6 +99,11 @@ export default async function PostDetailPage({
     }))
     .filter((row) => row.value !== "");
 
+  const kind = getDisplayKind(p, cats);
+  const mainPrice = priceLabel(p, kind);
+  const subText = priceSubText(p, kind);
+  const showDealRow = shouldShowDealRow(kind);
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-6">
       <div className="mb-4 flex items-center justify-between">
@@ -147,19 +158,21 @@ export default async function PostDetailPage({
 
           {/* スペック */}
           <div className="grid grid-cols-2 gap-4 pb-6 border-b border-line">
-            {p.condition && (
+            {p.condition && kind === "sale" && (
               <Spec label="商品の状態" value={p.condition} />
             )}
-            <Spec
-              label="取引タイプ"
-              value={
-                p.deal_type === "give"
-                  ? "あげます"
-                  : p.deal_type === "wanted"
-                  ? "求む"
-                  : "売ります"
-              }
-            />
+            {showDealRow && (
+              <Spec
+                label="取引タイプ"
+                value={
+                  p.deal_type === "give"
+                    ? "あげます"
+                    : p.deal_type === "wanted"
+                    ? "求む"
+                    : "売ります"
+                }
+              />
+            )}
             <Spec
               label="エリア"
               value={p.prefectures?.name ?? "全国"}
@@ -231,16 +244,11 @@ export default async function PostDetailPage({
         {/* 価格 + CTA */}
         <aside className="lg:sticky lg:top-24 self-start">
           <div className="rounded-card border border-line p-6 shadow-airbnb">
-            <div className="text-3xl font-bold mb-1">
-              {formatPrice(p.price, p.deal_type)}
-            </div>
-            <div className="text-sub text-sm mb-5">
-              {p.deal_type === "give"
-                ? "無料で譲ります"
-                : p.deal_type === "wanted"
-                ? "募集中"
-                : "送料込みかは出品者にご確認ください"}
-            </div>
+            <div className="text-3xl font-bold mb-1">{mainPrice}</div>
+            {subText && (
+              <div className="text-sub text-sm mb-5">{subText}</div>
+            )}
+            {!subText && <div className="mb-5" />}
             {p.status !== "active" ? (
               <div className="bg-surface text-sub text-center py-4 rounded-xl font-semibold">
                 取引終了

@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Post } from "@/types";
 import FavoriteButton from "./FavoriteButton";
-import { formatPrice } from "@/lib/utils";
+import { dealBadge, getDisplayKind, priceLabel } from "@/lib/postDisplay";
 
 export default function PostCard({
   post,
@@ -15,6 +15,10 @@ export default function PostCard({
   const href = prefSlug
     ? `/${prefSlug}/posts/${post.id}`
     : `/posts/${post.id}`;
+  const kind = getDisplayKind(post);
+  const badge = dealBadge(post, kind);
+  const price = priceLabel(post, kind);
+
   return (
     <Link href={href} className="group block">
       <div className="relative aspect-[4/3] overflow-hidden rounded-card bg-surface">
@@ -44,9 +48,14 @@ export default function PostCard({
           </div>
         )}
         <FavoriteButton postId={post.id} />
-        {post.deal_type === "give" && (
+        {badge && (
           <span className="absolute top-3 left-3 bg-success text-white text-xs font-bold px-2 py-1 rounded-md">
-            あげます
+            {badge}
+          </span>
+        )}
+        {post.online_purchasable && (
+          <span className="absolute top-3 right-12 bg-gradient-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-pill">
+            💳 オンライン決済
           </span>
         )}
         {post.status === "closed" && (
@@ -65,9 +74,7 @@ export default function PostCard({
           {post.prefectures?.name ?? "全国"}
           {post.categories?.name ? ` ・ ${post.categories.name}` : ""}
         </div>
-        <div className="mt-1 font-semibold">
-          {formatPrice(post.price, post.deal_type)}
-        </div>
+        <div className="mt-1 font-semibold">{price}</div>
       </div>
     </Link>
   );
