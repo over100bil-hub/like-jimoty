@@ -19,6 +19,14 @@ export type Announcement = {
   created_at: string;
 };
 
+export type Attribute = {
+  id: number;
+  slug: string;
+  name: string;
+  group_label: string | null;
+  sort_order: number | null;
+};
+
 export type Prefecture = {
   id: number;
   name: string;
@@ -44,6 +52,7 @@ export type Post = {
   view_count: number;
   condition: string | null;
   deal_type: DealType;
+  attribute_ids?: number[] | null;
   created_at: string;
   updated_at: string;
   categories?: Category | null;

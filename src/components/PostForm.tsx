@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import type { Category, Prefecture, Post, DealType } from "@/types";
+import type { Category, Prefecture, Post, DealType, Attribute } from "@/types";
 import { MAX_IMAGE_MB, MAX_IMAGES } from "@/lib/utils";
 
 type Props = {
@@ -49,6 +49,65 @@ export default function PostForm({
     post?.deal_type ?? initialDeal ?? "sell"
   );
   const [condition, setCondition] = useState<string>(post?.condition ?? "");
+
+  // 属性
+  const [availableAttributes, setAvailableAttributes] = useState<Attribute[]>(
+    []
+  );
+  const [selectedAttrs, setSelectedAttrs] = useState<number[]>(
+    post?.attribute_ids ?? []
+  );
+
+  useEffect(() => {
+    if (!categoryId) {
+      setAvailableAttributes([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("category_attributes")
+        .select("attributes(*)")
+        .eq("category_id", Number(categoryId));
+      if (cancelled) return;
+      const rows = (data ?? []) as unknown as {
+        attributes: Attribute | Attribute[] | null;
+      }[];
+      const attrs: Attribute[] = rows
+        .flatMap((r) =>
+          Array.isArray(r.attributes)
+            ? r.attributes
+            : r.attributes
+            ? [r.attributes]
+            : []
+        )
+        .sort(
+          (a, b) =>
+            (a.group_label ?? "").localeCompare(b.group_label ?? "") ||
+            (a.sort_order ?? 0) - (b.sort_order ?? 0)
+        );
+      setAvailableAttributes(attrs);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryId]);
+
+  const toggleAttr = (id: number) =>
+    setSelectedAttrs((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+
+  // group_label別にまとめる
+  const groupedAttrs = availableAttributes.reduce<Record<string, Attribute[]>>(
+    (acc, a) => {
+      const key = a.group_label ?? "その他";
+      (acc[key] = acc[key] ?? []).push(a);
+      return acc;
+    },
+    {}
+  );
 
   const [existingImages, setExistingImages] = useState<string[]>(
     post?.images ?? []
@@ -171,6 +230,7 @@ export default function PostForm({
         status: "active" as const,
         deal_type: dealType,
         condition: condition || null,
+        attribute_ids: selectedAttrs,
       };
 
       if (isEdit) {
@@ -326,6 +386,36 @@ export default function PostForm({
           ))}
         </div>
       </Field>
+
+      {availableAttributes.length > 0 && (
+        <Field label="詳細属性・条件">
+          <div className="space-y-4">
+            {Object.entries(groupedAttrs).map(([group, attrs]) => (
+              <div key={group}>
+                <p className="text-xs font-bold text-sub mb-2">{group}</p>
+                <div className="flex flex-wrap gap-2">
+                  {attrs.map((a) => {
+                    const active = selectedAttrs.includes(a.id);
+                    return (
+                      <button
+                        type="button"
+                        key={a.id}
+                        onClick={() => toggleAttr(a.id)}
+                        className={`pill text-sm ${
+                          active ? "pill-active" : ""
+                        }`}
+                      >
+                        {active && "✓ "}
+                        {a.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Field>
+      )}
 
       <Field
         label={

@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState } from "react";
-import type { Prefecture } from "@/types";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { Prefecture, Attribute } from "@/types";
 
 export default function FilterChips({
   prefectures,
@@ -17,6 +18,57 @@ export default function FilterChips({
   const [openPref, setOpenPref] = useState(false);
   const [openPrice, setOpenPrice] = useState(false);
   const [openDeal, setOpenDeal] = useState(false);
+  const [openAttr, setOpenAttr] = useState(false);
+  const [availableAttrs, setAvailableAttrs] = useState<Attribute[]>([]);
+  const supabase = createClient();
+  const categorySlug = sp.get("category");
+  const selectedAttrs = (sp.get("attrs") ?? "")
+    .split(",")
+    .filter(Boolean)
+    .map((s) => Number(s));
+
+  // 選択中カテゴリに紐づく属性をフェッチ
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!categorySlug) {
+        setAvailableAttrs([]);
+        return;
+      }
+      const { data: cat } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("slug", categorySlug)
+        .maybeSingle();
+      if (!cat || cancelled) return;
+      const { data } = await supabase
+        .from("category_attributes")
+        .select("attributes(*)")
+        .eq("category_id", cat.id);
+      if (cancelled) return;
+      const rows = (data ?? []) as unknown as {
+        attributes: Attribute | Attribute[] | null;
+      }[];
+      const attrs: Attribute[] = rows
+        .flatMap((r) =>
+          Array.isArray(r.attributes)
+            ? r.attributes
+            : r.attributes
+            ? [r.attributes]
+            : []
+        )
+        .sort(
+          (a, b) =>
+            (a.group_label ?? "").localeCompare(b.group_label ?? "") ||
+            (a.sort_order ?? 0) - (b.sort_order ?? 0)
+        );
+      setAvailableAttrs(attrs);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categorySlug]);
 
   const update = (kv: Record<string, string | null>) => {
     const params = new URLSearchParams(sp.toString());
@@ -30,9 +82,16 @@ export default function FilterChips({
 
   const reset = () => router.push(pathname);
   const filterKeys = hidePrefecture
-    ? ["q", "category", "deal", "min", "max"]
-    : ["q", "category", "prefecture", "deal", "min", "max"];
+    ? ["q", "category", "deal", "min", "max", "attrs"]
+    : ["q", "category", "prefecture", "deal", "min", "max", "attrs"];
   const isFiltered = filterKeys.some((k) => sp.get(k));
+
+  const toggleAttr = (id: number) => {
+    const next = selectedAttrs.includes(id)
+      ? selectedAttrs.filter((x) => x !== id)
+      : [...selectedAttrs, id];
+    update({ attrs: next.length > 0 ? next.join(",") : null });
+  };
 
   const prefName =
     prefectures.find((p) => String(p.id) === sp.get("prefecture"))?.name ?? null;
@@ -69,6 +128,17 @@ export default function FilterChips({
           active={!!(sp.get("min") || sp.get("max"))}
           onClick={() => setOpenPrice(true)}
         />
+        {availableAttrs.length > 0 && (
+          <FilterPill
+            label={
+              selectedAttrs.length > 0
+                ? `条件 ${selectedAttrs.length}件`
+                : "詳細条件"
+            }
+            active={selectedAttrs.length > 0}
+            onClick={() => setOpenAttr(true)}
+          />
+        )}
         {isFiltered && (
           <button
             onClick={reset}
@@ -130,6 +200,51 @@ export default function FilterChips({
                 {o.l}
               </button>
             ))}
+          </div>
+        </Sheet>
+      )}
+      {openAttr && (
+        <Sheet onClose={() => setOpenAttr(false)} title="詳細条件で絞り込む">
+          <div className="space-y-4">
+            {(() => {
+              const grouped = availableAttrs.reduce<
+                Record<string, Attribute[]>
+              >((acc, a) => {
+                const key = a.group_label ?? "その他";
+                (acc[key] = acc[key] ?? []).push(a);
+                return acc;
+              }, {});
+              return Object.entries(grouped).map(([group, attrs]) => (
+                <div key={group}>
+                  <p className="text-xs font-bold text-sub mb-2">{group}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {attrs.map((a) => {
+                      const active = selectedAttrs.includes(a.id);
+                      return (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={() => toggleAttr(a.id)}
+                          className={`pill text-sm ${
+                            active ? "pill-active" : ""
+                          }`}
+                        >
+                          {active && "✓ "}
+                          {a.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ));
+            })()}
+            <button
+              type="button"
+              onClick={() => setOpenAttr(false)}
+              className="btn-primary w-full mt-2"
+            >
+              閉じる
+            </button>
           </div>
         </Sheet>
       )}

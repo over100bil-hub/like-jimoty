@@ -20,6 +20,7 @@ type SearchParams = {
   deal?: string;
   min?: string;
   max?: string;
+  attrs?: string;
 };
 
 export async function generateMetadata({
@@ -124,6 +125,15 @@ export default async function PrefHomePage({
     query = query.or(
       `title.ilike.%${sp.q}%,description.ilike.%${sp.q}%`
     );
+  }
+  if (sp.attrs) {
+    const ids = sp.attrs
+      .split(",")
+      .map((s) => Number(s))
+      .filter((n) => !isNaN(n));
+    if (ids.length > 0) {
+      query = query.contains("attribute_ids", ids);
+    }
   }
 
   const { data: posts } = await query;
