@@ -257,11 +257,35 @@ export default function PostForm({
             className="input"
           >
             <option value="">選択してください</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
+            {categories
+              .filter((c) => !c.parent_id)
+              .sort((a, b) => a.sort_order - b.sort_order)
+              .map((parent) => {
+                const children = categories
+                  .filter((c) => c.parent_id === parent.id)
+                  .sort((a, b) => a.sort_order - b.sort_order);
+                if (children.length === 0) {
+                  return (
+                    <option key={parent.id} value={parent.id}>
+                      {parent.icon ? `${parent.icon} ` : ""}
+                      {parent.name}
+                    </option>
+                  );
+                }
+                return (
+                  <optgroup
+                    key={parent.id}
+                    label={`${parent.icon ?? ""} ${parent.name}`}
+                  >
+                    <option value={parent.id}>{parent.name}（全般）</option>
+                    {children.map((child) => (
+                      <option key={child.id} value={child.id}>
+                        　{child.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                );
+              })}
           </select>
         </Field>
         <Field label="エリア">

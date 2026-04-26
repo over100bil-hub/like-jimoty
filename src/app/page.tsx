@@ -43,7 +43,19 @@ export default async function HomePage({
 
   if (params.category) {
     const cat = categories.find((c) => c.slug === params.category);
-    if (cat) query = query.eq("category_id", cat.id);
+    if (cat) {
+      // 親カテゴリ選択時は子カテゴリの投稿も含める
+      const isParent = !cat.parent_id;
+      if (isParent) {
+        const childIds = categories
+          .filter((c) => c.parent_id === cat.id)
+          .map((c) => c.id);
+        const ids = [cat.id, ...childIds];
+        query = query.in("category_id", ids);
+      } else {
+        query = query.eq("category_id", cat.id);
+      }
+    }
   }
   if (params.prefecture) {
     query = query.eq("prefecture_id", Number(params.prefecture));

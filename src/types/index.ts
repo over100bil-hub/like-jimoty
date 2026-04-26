@@ -3,6 +3,8 @@ export type Category = {
   name: string;
   slug: string;
   sort_order: number;
+  parent_id?: number | null;
+  icon?: string | null;
 };
 
 export type Prefecture = {
