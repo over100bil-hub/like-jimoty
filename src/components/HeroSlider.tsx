@@ -27,7 +27,7 @@ export default function HeroSlider() {
       className="relative w-full overflow-hidden border-b border-line"
     >
       {/* Slides */}
-      <div className="relative w-full h-[420px] sm:h-[540px] md:h-[640px] lg:h-[700px]">
+      <div className="relative w-full h-[315px] sm:h-[405px] md:h-[480px] lg:h-[525px]">
         {IMAGES.map((src, i) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img

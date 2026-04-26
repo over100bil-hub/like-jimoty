@@ -155,6 +155,25 @@ export default function PostForm({
 
   const isFreeDeal = dealType === "give" || dealType === "wanted";
 
+  // sale系（家具・家電など）かどうかを topSlug で判定
+  const SALE_TOPS = new Set([
+    "furniture",
+    "appliances",
+    "clothing",
+    "baby-kids",
+    "books-media",
+    "sports-outdoor",
+    "toys-hobby",
+    "pc-mobile",
+    "tickets",
+    "pets",
+    "others",
+  ]);
+  const isSaleCategory = !!topSlug && SALE_TOPS.has(topSlug);
+  const showPriceField =
+    isSaleCategory || topSlug === "vehicles" || topSlug === "events";
+  const showConditionField = isSaleCategory;
+
   // 画像WebP変換 + リサイズ
   const optimizeImage = async (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -258,7 +277,7 @@ export default function PostForm({
         description,
         category_id: categoryId ? parseInt(categoryId) : null,
         prefecture_id: prefectureId ? parseInt(prefectureId) : null,
-        price: isFreeDeal ? 0 : parseInt(price) || 0,
+        price: !showPriceField || isFreeDeal ? 0 : parseInt(price) || 0,
         contact_email: contactEmail,
         images,
         user_id: userId,
@@ -306,25 +325,6 @@ export default function PostForm({
           {error}
         </div>
       )}
-
-      <Field label="取引タイプ" required>
-        <div className="flex flex-wrap gap-2">
-          {[
-            { v: "sell", l: "売ります" },
-            { v: "give", l: "あげます" },
-            { v: "wanted", l: "求む" },
-          ].map((o) => (
-            <button
-              type="button"
-              key={o.v}
-              onClick={() => setDealType(o.v as DealType)}
-              className={`pill ${dealType === o.v ? "pill-active" : ""}`}
-            >
-              {o.l}
-            </button>
-          ))}
-        </div>
-      </Field>
 
       <Field label="タイトル" required>
         <input
@@ -409,20 +409,44 @@ export default function PostForm({
         </Field>
       </div>
 
-      <Field label="商品状態">
-        <div className="flex flex-wrap gap-2">
-          {CONDITIONS.map((c) => (
-            <button
-              type="button"
-              key={c}
-              onClick={() => setCondition(c === condition ? "" : c)}
-              className={`pill ${condition === c ? "pill-active" : ""}`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </Field>
+      {/* 売ります系のみ: 取引タイプ */}
+      {isSaleCategory && (
+        <Field label="取引タイプ" required>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { v: "sell", l: "売ります" },
+              { v: "give", l: "あげます" },
+              { v: "wanted", l: "求む" },
+            ].map((o) => (
+              <button
+                type="button"
+                key={o.v}
+                onClick={() => setDealType(o.v as DealType)}
+                className={`pill ${dealType === o.v ? "pill-active" : ""}`}
+              >
+                {o.l}
+              </button>
+            ))}
+          </div>
+        </Field>
+      )}
+
+      {showConditionField && (
+        <Field label="商品状態">
+          <div className="flex flex-wrap gap-2">
+            {CONDITIONS.map((c) => (
+              <button
+                type="button"
+                key={c}
+                onClick={() => setCondition(c === condition ? "" : c)}
+                className={`pill ${condition === c ? "pill-active" : ""}`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </Field>
+      )}
 
       {/* カテゴリ別の専用フィールド */}
       {dynamicFields.length > 0 && (
@@ -488,32 +512,34 @@ export default function PostForm({
         </Field>
       )}
 
-      <Field
-        label={
-          <>
-            価格
-            {isFreeDeal && (
-              <span className="text-sub text-xs ml-2">
-                （あげます・求むは無料固定）
-              </span>
-            )}
-          </>
-        }
-      >
-        <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sub">
-            ¥
-          </span>
-          <input
-            type="number"
-            min={0}
-            value={isFreeDeal ? "0" : price}
-            onChange={(e) => setPrice(e.target.value)}
-            disabled={isFreeDeal}
-            className="input pl-8 disabled:bg-surface disabled:text-sub"
-          />
-        </div>
-      </Field>
+      {showPriceField && (
+        <Field
+          label={
+            <>
+              価格
+              {isFreeDeal && (
+                <span className="text-sub text-xs ml-2">
+                  （あげます・求むは無料固定）
+                </span>
+              )}
+            </>
+          }
+        >
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sub">
+              ¥
+            </span>
+            <input
+              type="number"
+              min={0}
+              value={isFreeDeal ? "0" : price}
+              onChange={(e) => setPrice(e.target.value)}
+              disabled={isFreeDeal}
+              className="input pl-8 disabled:bg-surface disabled:text-sub"
+            />
+          </div>
+        </Field>
+      )}
 
       <Field label="連絡先メール" required>
         <input

@@ -79,6 +79,7 @@ export default async function PrefHomePage({
     { data: prefecturesRaw },
     { data: announcementsRaw },
     { data: freePostsRaw },
+    { data: latestPostsRaw },
   ] = await Promise.all([
     supabase.from("categories").select("*").order("sort_order"),
     supabase.from("prefectures").select("*").order("sort_order"),
@@ -98,11 +99,21 @@ export default async function PrefHomePage({
       .eq("prefecture_id", prefecture.id)
       .order("created_at", { ascending: false })
       .limit(10),
+    supabase
+      .from("posts")
+      .select(
+        "*, categories(name,slug), prefectures(name,slug), profiles(nickname,avatar_url)"
+      )
+      .eq("status", "active")
+      .eq("prefecture_id", prefecture.id)
+      .order("created_at", { ascending: false })
+      .limit(10),
   ]);
   const categories = (categoriesRaw as Category[]) ?? [];
   const prefectures = (prefecturesRaw as Prefecture[]) ?? [];
   const announcements = (announcementsRaw as Announcement[]) ?? [];
   const freePosts = (freePostsRaw as Post[]) ?? [];
+  const latestPosts = (latestPostsRaw as Post[]) ?? [];
 
   let query = supabase
     .from("posts")
@@ -209,6 +220,33 @@ export default async function PrefHomePage({
 
       {!sp.category && !sp.q && !sp.deal && (
         <HeroFreeList posts={freePosts} prefSlug={prefSlug} />
+      )}
+
+      {/* 新着投稿 5x2 */}
+      {!sp.category && !sp.q && !sp.deal && latestPosts.length > 0 && (
+        <section className="border-b border-line bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base sm:text-lg font-extrabold flex items-center gap-2">
+                <span className="bg-gradient-brand text-white text-xs px-2 py-1 rounded-pill">
+                  新着
+                </span>
+                <span className="text-ink">{prefecture.name}の新着投稿</span>
+              </h2>
+              <Link
+                href={`/${prefSlug}`}
+                className="text-xs sm:text-sm font-semibold text-accent hover:underline"
+              >
+                すべて見る →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
+              {latestPosts.slice(0, 10).map((p) => (
+                <PostCard key={p.id} post={p} prefSlug={prefSlug} />
+              ))}
+            </div>
+          </div>
+        </section>
       )}
 
       <Suspense fallback={<div className="h-14 border-b border-line" />}>

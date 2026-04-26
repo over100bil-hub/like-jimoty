@@ -219,11 +219,10 @@ export const CATEGORY_FIELDS: Record<string, CategoryField[]> = {
       type: "select",
       key: "salary_type",
       label: "給与形態",
+      filterable: "exact",
       options: [
         { value: "monthly", label: "月給" },
-        { value: "daily", label: "日給" },
         { value: "hourly", label: "時給" },
-        { value: "annual", label: "年俸" },
       ],
     },
     {
@@ -328,7 +327,7 @@ export const CATEGORY_FIELDS: Record<string, CategoryField[]> = {
   members: [
     { type: "text", key: "activity_type", label: "活動内容" },
     { type: "text", key: "frequency", label: "活動頻度", placeholder: "例: 月2回" },
-    { type: "number", key: "fee", label: "参加費(月)", unit: "円", filterable: "range" },
+    { type: "number", key: "fee", label: "参加費", unit: "円", filterable: "range" },
     { type: "number", key: "member_count", label: "現メンバー数", unit: "名" },
     {
       type: "select",
@@ -414,6 +413,58 @@ export const CATEGORY_FIELDS: Record<string, CategoryField[]> = {
     { type: "text", key: "color", label: "色" },
     { type: "number", key: "purchase_year", label: "購入年", unit: "年" },
   ],
+  // ==== ホテル・宿泊施設 ====
+  hotel: [
+    {
+      type: "text",
+      key: "plan_name",
+      label: "プラン名",
+      placeholder: "例: 朝食付き素泊まりプラン",
+    },
+    {
+      type: "number",
+      key: "plan_price",
+      label: "プラン金額",
+      unit: "円",
+      filterable: "range",
+    },
+    {
+      type: "select",
+      key: "fee_period",
+      label: "料金単位",
+      options: [
+        { value: "per_night", label: "1泊あたり" },
+        { value: "per_person", label: "1名あたり" },
+        { value: "total", label: "合計" },
+      ],
+    },
+    { type: "number", key: "capacity", label: "定員", unit: "名" },
+    { type: "text", key: "checkin_time", label: "チェックイン時間", placeholder: "例: 15:00" },
+    { type: "text", key: "checkout_time", label: "チェックアウト時間", placeholder: "例: 10:00" },
+    { type: "text", key: "address", label: "所在地" },
+    { type: "text", key: "station", label: "最寄駅" },
+    { type: "number", key: "walk_minutes", label: "駅徒歩", unit: "分" },
+    {
+      type: "select",
+      key: "room_type",
+      label: "部屋タイプ",
+      options: [
+        { value: "single", label: "シングル" },
+        { value: "twin", label: "ツイン" },
+        { value: "double", label: "ダブル" },
+        { value: "japanese", label: "和室" },
+        { value: "suite", label: "スイート" },
+        { value: "dormitory", label: "ドミトリー" },
+        { value: "other", label: "その他" },
+      ],
+    },
+    { type: "boolean", key: "breakfast_included", label: "朝食付き", filterable: "exact" },
+    { type: "boolean", key: "dinner_included", label: "夕食付き", filterable: "exact" },
+    { type: "boolean", key: "onsen", label: "温泉あり", filterable: "exact" },
+    { type: "boolean", key: "wifi_free", label: "Wi-Fi無料", filterable: "exact" },
+    { type: "boolean", key: "parking_avail", label: "駐車場あり", filterable: "exact" },
+  ],
+
   // ==== ボランティア ====
   volunteer: [
     { type: "date", key: "event_date", label: "活動日" },

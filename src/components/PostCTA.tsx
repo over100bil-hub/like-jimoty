@@ -21,6 +21,7 @@ const OPTIONS: { type: string; label: string; icon: string }[] = [
   { type: "events", label: "イベント", icon: "🎉" },
   { type: "realestate", label: "不動産", icon: "🏠" },
   { type: "localshop", label: "地元のお店", icon: "🏪" },
+  { type: "hotel", label: "ホテル・宿泊施設", icon: "🏨" },
 ];
 
 export default function PostCTA({

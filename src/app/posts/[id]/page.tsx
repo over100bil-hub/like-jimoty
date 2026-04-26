@@ -19,6 +19,7 @@ import {
   priceLabel,
   priceSubText,
   shouldShowDealRow,
+  descriptionSectionLabel,
 } from "@/lib/postDisplay";
 
 export const revalidate = 0;
@@ -215,7 +216,9 @@ export default async function PostDetailPage({
 
           {/* 説明 */}
           <div>
-            <h2 className="font-bold text-xl mb-3">商品説明</h2>
+            <h2 className="font-bold text-xl mb-3">
+              {descriptionSectionLabel(kind)}
+            </h2>
             <p className="whitespace-pre-wrap leading-relaxed">
               {p.description}
             </p>
@@ -259,6 +262,18 @@ export default async function PostDetailPage({
               </div>
             ) : (
               <ContactSection postId={p.id} sellerId={p.user_id} />
+            )}
+
+            {/* お気に入り（自分以外の出品で常時表示） */}
+            {!isOwner && p.status === "active" && (
+              <div className="mt-4 pt-4 border-t border-line">
+                <FavoriteButton
+                  postId={p.id}
+                  variant="inline"
+                  size="lg"
+                  fullWidth
+                />
+              </div>
             )}
           </div>
         </aside>

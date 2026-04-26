@@ -9,11 +9,13 @@ export default function FavoriteButton({
   initialActive = false,
   size = "md",
   variant = "overlay",
+  fullWidth = false,
 }: {
   postId: string;
   initialActive?: boolean;
   size?: "sm" | "md" | "lg";
   variant?: "overlay" | "inline";
+  fullWidth?: boolean;
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -86,11 +88,13 @@ export default function FavoriteButton({
       <button
         onClick={onToggle}
         disabled={loading}
-        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-pill border border-line hover:bg-surface transition-colors text-sm font-semibold disabled:opacity-50`}
+        className={`${
+          fullWidth ? "w-full justify-center" : "inline-flex"
+        } inline-flex items-center gap-2 px-4 py-2.5 rounded-pill border border-line hover:bg-accent-soft hover:border-accent transition-colors text-sm font-semibold disabled:opacity-50`}
         aria-pressed={active}
       >
         <Heart filled={active} size={cls.icon} />
-        {active ? "保存済み" : "保存"}
+        {active ? "お気に入り済み" : "お気に入りに追加"}
       </button>
     );
   }

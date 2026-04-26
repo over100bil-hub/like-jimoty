@@ -29,6 +29,7 @@ const TYPE_PRESETS: Record<
   events: { categorySlug: "events", deal: "give", headline: "イベント" },
   realestate: { categorySlug: "realestate", deal: "sell", headline: "不動産" },
   localshop: { categorySlug: "localshop", deal: "sell", headline: "地元のお店" },
+  hotel: { categorySlug: "hotel", deal: "sell", headline: "ホテル・宿泊施設" },
 };
 
 export default async function NewPostPage({

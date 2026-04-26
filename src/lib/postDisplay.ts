@@ -31,6 +31,7 @@ export type DisplayKind =
   | "community"
   | "localshop"
   | "volunteer"
+  | "hotel"
   | "unknown";
 
 const KNOWN_TOP_SLUGS = [
@@ -44,6 +45,7 @@ const KNOWN_TOP_SLUGS = [
   "community",
   "localshop",
   "volunteer",
+  "hotel",
 ];
 
 function inferTopFromSlug(slug: string | null | undefined): string | null {
@@ -109,15 +111,7 @@ export function priceLabel(post: Post, kind: DisplayKind): string {
       const max = pickInt("salary_max");
       const type = String(attrs.salary_type ?? "");
       const unit =
-        type === "hourly"
-          ? "時給"
-          : type === "daily"
-          ? "日給"
-          : type === "annual"
-          ? "年俸"
-          : type === "monthly"
-          ? "月給"
-          : "給与";
+        type === "hourly" ? "時給" : type === "monthly" ? "月給" : "給与";
       if (min != null && max != null) return `${unit} ${yen(min)}〜${yen(max)}`;
       if (min != null) return `${unit} ${yen(min)}〜`;
       if (max != null) return `${unit} 〜${yen(max)}`;
@@ -143,8 +137,26 @@ export function priceLabel(post: Post, kind: DisplayKind): string {
     case "members": {
       const fee = pickInt("fee");
       if (fee === 0) return "参加費無料";
-      if (fee != null) return `会費 ${yen(fee)}/月`;
-      return "会費応相談";
+      if (fee != null) return `参加費 ${yen(fee)}`;
+      return "参加費応相談";
+    }
+    case "hotel": {
+      const planName = (attrs.plan_name as string) ?? "";
+      const price = pickInt("plan_price");
+      const period = String(attrs.fee_period ?? "");
+      const suffix =
+        period === "per_night"
+          ? "/泊"
+          : period === "per_person"
+          ? "/名"
+          : "";
+      if (price != null) {
+        return planName
+          ? `${planName} ${yen(price)}${suffix}`
+          : `${yen(price)}${suffix}`;
+      }
+      if (post.price && post.price > 0) return `${yen(post.price)}${suffix}`;
+      return "料金応相談";
     }
     case "community": {
       const t = String(attrs.fee_type ?? "");
@@ -193,9 +205,16 @@ export function priceSubText(post: Post, kind: DisplayKind): string {
       return "詳しい営業情報はお店にお問合せください";
     case "volunteer":
       return "活動内容は主催者にご確認ください";
+    case "hotel":
+      return "料金は税込/税抜・サービス料の有無を投稿者にご確認ください";
     default:
       return "";
   }
+}
+
+/** 詳細ページの説明セクションの見出し（売ります系のみ「商品の詳細」） */
+export function descriptionSectionLabel(kind: DisplayKind): string {
+  return kind === "sale" ? "商品の詳細" : "詳細説明";
 }
 
 /** PostCard等で価格上に表示する小さなバッジ。空文字なら非表示 */
