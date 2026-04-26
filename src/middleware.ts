@@ -55,6 +55,15 @@ const PREF_SLUGS = new Set([
 export async function middleware(request: NextRequest) {
   const response = await updateSession(request);
 
+  // /?reset=1 ならpref_slug Cookieを削除
+  if (
+    request.nextUrl.pathname === "/" &&
+    request.nextUrl.searchParams.get("reset") === "1"
+  ) {
+    response.cookies.delete("pref_slug");
+    return response;
+  }
+
   // パス先頭が都道府県slugならCookieに保存
   const segments = request.nextUrl.pathname.split("/").filter(Boolean);
   const first = segments[0];

@@ -19,11 +19,17 @@ const REGION_ORDER = [
   "沖縄",
 ];
 
-export default async function HomePage() {
-  // Cookieに保存済みpref_slugがあれば自動リダイレクト
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reset?: string }>;
+}) {
+  const sp = await searchParams;
   const cookieStore = await cookies();
   const savedPref = cookieStore.get("pref_slug")?.value;
-  if (savedPref) {
+  // ?reset=1 が無く、Cookieがあれば自動リダイレクト
+  // ?reset=1 のときはmiddlewareがCookieを削除するため、ここでは選択画面を表示
+  if (!sp.reset && savedPref) {
     redirect(`/${savedPref}`);
   }
 

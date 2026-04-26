@@ -27,7 +27,7 @@ export default function HeroSlider() {
       className="relative w-full overflow-hidden border-b border-line"
     >
       {/* Slides */}
-      <div className="relative w-full h-[260px] sm:h-[380px] md:h-[460px]">
+      <div className="relative w-full h-[420px] sm:h-[540px] md:h-[640px] lg:h-[700px]">
         {IMAGES.map((src, i) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -51,7 +51,7 @@ export default function HeroSlider() {
         <div className="absolute inset-0 flex items-center justify-center px-4">
           <div className="text-center max-w-3xl">
             <h1
-              className="text-white font-extrabold tracking-tight leading-tight text-[26px] sm:text-5xl md:text-6xl"
+              className="text-white font-extrabold tracking-tight leading-tight text-[30px] sm:text-5xl md:text-6xl lg:text-7xl"
               style={{
                 textShadow:
                   "0 2px 8px rgba(0,0,0,0.6), 0 4px 24px rgba(0,0,0,0.45)",

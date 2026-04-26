@@ -184,7 +184,7 @@ export default function Header() {
             </div>
             {prefSlug && (
               <Link
-                href="/"
+                href="/?reset=1"
                 className="hidden md:inline-flex items-center gap-1 text-xs font-semibold text-sub hover:text-accent px-2 py-1 rounded-pill border border-line hover:border-accent transition"
                 title="地域を変更"
               >

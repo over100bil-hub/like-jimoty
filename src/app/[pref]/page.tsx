@@ -141,7 +141,7 @@ export default async function PrefHomePage({
             </span>
           </h1>
           <Link
-            href="/"
+            href="/?reset=1"
             className="text-xs sm:text-sm font-semibold text-accent hover:underline"
           >
             地域を変更 →
