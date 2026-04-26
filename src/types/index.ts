@@ -53,6 +53,8 @@ export type Post = {
   condition: string | null;
   deal_type: DealType;
   attribute_ids?: number[] | null;
+  attrs?: Record<string, unknown> | null;
+  online_purchasable?: boolean | null;
   created_at: string;
   updated_at: string;
   categories?: Category | null;

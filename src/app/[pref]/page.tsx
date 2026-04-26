@@ -21,6 +21,17 @@ type SearchParams = {
   min?: string;
   max?: string;
   attrs?: string;
+  online?: string;
+  [key: `f_${string}`]: string | undefined;
+};
+
+// JSONB範囲検索用: f_xxx_min/f_xxx_max -> generated columnへマップ
+const RANGE_KEY_TO_COL: Record<string, string> = {
+  year: "year_int",
+  mileage: "mileage_int",
+  area_m2: "area_m2_int",
+  rent: "rent_int",
+  salary_min: "salary_min_int",
 };
 
 export async function generateMetadata({
@@ -133,6 +144,35 @@ export default async function PrefHomePage({
       .filter((n) => !isNaN(n));
     if (ids.length > 0) {
       query = query.contains("attribute_ids", ids);
+    }
+  }
+  if (sp.online === "true") {
+    query = query.eq("online_purchasable", true);
+  }
+  // 動的: f_xxx (exact) と f_xxx_min/_max (range)
+  for (const [k, v] of Object.entries(sp)) {
+    if (typeof v !== "string" || v === "") continue;
+    if (k.startsWith("f_")) {
+      const rest = k.slice(2);
+      const minMatch = rest.match(/^(.+)_min$/);
+      const maxMatch = rest.match(/^(.+)_max$/);
+      if (minMatch) {
+        const col = RANGE_KEY_TO_COL[minMatch[1]];
+        if (col) query = query.gte(col, Number(v));
+      } else if (maxMatch) {
+        const col = RANGE_KEY_TO_COL[maxMatch[1]];
+        if (col) query = query.lte(col, Number(v));
+      } else {
+        // exact: JSONB の attrs->>key === v
+        // boolean "true" は jsonb 上は文字列保存と true 両方を許容
+        if (v === "true") {
+          query = query.or(
+            `attrs->>${rest}.eq.true,attrs->${rest}.eq.true`
+          );
+        } else {
+          query = query.eq(`attrs->>${rest}` as never, v);
+        }
+      }
     }
   }
 

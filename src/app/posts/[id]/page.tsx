@@ -7,8 +7,13 @@ import StatusToggle from "./StatusToggle";
 import ContactSection from "./ContactSection";
 import ImageGallery from "./ImageGallery";
 import FavoriteButton from "@/components/FavoriteButton";
-import type { Post } from "@/types";
+import type { Post, Category } from "@/types";
 import { formatPrice, formatRelativeTime } from "@/lib/utils";
+import {
+  getCategoryFields,
+  resolveTopCategorySlug,
+  fieldValueToLabel,
+} from "@/lib/categoryFields";
 
 export const revalidate = 0;
 
@@ -72,6 +77,21 @@ export default async function PostDetailPage({
   } = await supabase.auth.getUser();
   const p = post as Post;
   const isOwner = user?.id === p.user_id;
+
+  // カテゴリ別フィールド: attrs から表示用に構造化
+  const { data: catsRaw } = await supabase
+    .from("categories")
+    .select("id,slug,parent_id");
+  const cats = (catsRaw as Category[]) ?? [];
+  const topSlug = resolveTopCategorySlug(p.category_id, cats);
+  const categoryFields = getCategoryFields(topSlug);
+  const attrs = (p.attrs ?? {}) as Record<string, unknown>;
+  const specRows = categoryFields
+    .map((f) => ({
+      label: f.label,
+      value: fieldValueToLabel(f, attrs[f.key]),
+    }))
+    .filter((row) => row.value !== "");
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-6">
@@ -149,6 +169,36 @@ export default async function PostDetailPage({
               value={p.status === "active" ? "公開中" : "取引終了"}
             />
           </div>
+
+          {/* カテゴリ別 詳細スペック */}
+          {specRows.length > 0 && (
+            <div>
+              <h2 className="font-bold text-xl mb-3">詳細情報</h2>
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 border border-line rounded-card overflow-hidden">
+                {specRows.map((row) => (
+                  <div
+                    key={row.label}
+                    className="flex border-b border-line last:border-b-0 sm:border-b sm:[&:nth-last-child(-n+2)]:border-b-0"
+                  >
+                    <dt className="w-32 px-3 py-2 bg-surface text-xs text-sub flex items-center">
+                      {row.label}
+                    </dt>
+                    <dd className="flex-1 px-3 py-2 text-sm font-semibold">
+                      {row.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+
+          {/* オンライン決済バッジ */}
+          {p.online_purchasable && (
+            <div className="bg-gradient-brand text-white text-sm font-bold px-4 py-3 rounded-card flex items-center gap-2">
+              <span>💳</span>
+              <span>オンライン決済対応</span>
+            </div>
+          )}
 
           {/* 説明 */}
           <div>

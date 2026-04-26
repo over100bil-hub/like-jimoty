@@ -1,10 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { Category, Prefecture, Post, DealType, Attribute } from "@/types";
 import { MAX_IMAGE_MB, MAX_IMAGES } from "@/lib/utils";
+import {
+  getCategoryFields,
+  resolveTopCategorySlug,
+  type CategoryField,
+} from "@/lib/categoryFields";
 
 type Props = {
   categories: Category[];
@@ -57,6 +62,36 @@ export default function PostForm({
   const [selectedAttrs, setSelectedAttrs] = useState<number[]>(
     post?.attribute_ids ?? []
   );
+
+  // カテゴリ別の動的フィールド値
+  const [attrs, setAttrs] = useState<Record<string, unknown>>(
+    (post?.attrs as Record<string, unknown>) ?? {}
+  );
+  const [onlinePurchasable, setOnlinePurchasable] = useState<boolean>(
+    !!post?.online_purchasable
+  );
+
+  // 現在選択中カテゴリの大カテゴリ(top) slugを解決
+  const topSlug = useMemo(
+    () =>
+      resolveTopCategorySlug(
+        categoryId ? Number(categoryId) : null,
+        categories
+      ),
+    [categoryId, categories]
+  );
+  const dynamicFields: CategoryField[] = useMemo(
+    () => getCategoryFields(topSlug),
+    [topSlug]
+  );
+
+  const setAttrValue = (key: string, value: unknown) =>
+    setAttrs((prev) => {
+      const next = { ...prev };
+      if (value === "" || value == null) delete next[key];
+      else next[key] = value;
+      return next;
+    });
 
   useEffect(() => {
     if (!categoryId) {
@@ -231,6 +266,8 @@ export default function PostForm({
         deal_type: dealType,
         condition: condition || null,
         attribute_ids: selectedAttrs,
+        attrs,
+        online_purchasable: onlinePurchasable,
       };
 
       if (isEdit) {
@@ -387,6 +424,40 @@ export default function PostForm({
         </div>
       </Field>
 
+      {/* カテゴリ別の専用フィールド */}
+      {dynamicFields.length > 0 && (
+        <Field label="カテゴリ別の詳細情報">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {dynamicFields.map((f) => (
+              <DynamicField
+                key={f.key}
+                field={f}
+                value={attrs[f.key]}
+                onChange={(v) => setAttrValue(f.key, v)}
+              />
+            ))}
+          </div>
+        </Field>
+      )}
+
+      {/* オンライン決済対応フラグ */}
+      <Field label="オンライン決済">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={onlinePurchasable}
+            onChange={(e) => setOnlinePurchasable(e.target.checked)}
+            className="w-5 h-5 accent-orange-500"
+          />
+          <span className="text-sm">
+            オンライン決済に対応する
+            <span className="text-xs text-sub block">
+              ※ チェックするとフィルタで「オンライン決済対応」として表示されます
+            </span>
+          </span>
+        </label>
+      </Field>
+
       {availableAttributes.length > 0 && (
         <Field label="詳細属性・条件">
           <div className="space-y-4">
@@ -540,6 +611,96 @@ function Field({
       </label>
       {children}
     </div>
+  );
+}
+
+function DynamicField({
+  field,
+  value,
+  onChange,
+}: {
+  field: CategoryField;
+  value: unknown;
+  onChange: (v: unknown) => void;
+}) {
+  if (field.type === "select") {
+    return (
+      <label className="block">
+        <span className="text-sm text-sub mb-1 block">{field.label}</span>
+        <select
+          value={(value as string) ?? ""}
+          onChange={(e) => onChange(e.target.value || "")}
+          className="input"
+        >
+          <option value="">選択してください</option>
+          {field.options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </label>
+    );
+  }
+  if (field.type === "number") {
+    return (
+      <label className="block">
+        <span className="text-sm text-sub mb-1 block">
+          {field.label}
+          {field.unit && <span className="text-xs ml-1">({field.unit})</span>}
+        </span>
+        <input
+          type="number"
+          value={(value as number | string) ?? ""}
+          onChange={(e) =>
+            onChange(e.target.value === "" ? "" : Number(e.target.value))
+          }
+          min={field.min}
+          max={field.max}
+          className="input"
+        />
+      </label>
+    );
+  }
+  if (field.type === "boolean") {
+    return (
+      <label className="flex items-center gap-2 cursor-pointer pt-6">
+        <input
+          type="checkbox"
+          checked={!!value}
+          onChange={(e) => onChange(e.target.checked)}
+          className="w-5 h-5 accent-orange-500"
+        />
+        <span className="text-sm">{field.label}</span>
+      </label>
+    );
+  }
+  if (field.type === "date") {
+    return (
+      <label className="block">
+        <span className="text-sm text-sub mb-1 block">{field.label}</span>
+        <input
+          type="date"
+          value={(value as string) ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          className="input"
+        />
+      </label>
+    );
+  }
+  // text
+  return (
+    <label className="block">
+      <span className="text-sm text-sub mb-1 block">{field.label}</span>
+      <input
+        type="text"
+        value={(value as string) ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={field.placeholder}
+        maxLength={field.maxLength}
+        className="input"
+      />
+    </label>
   );
 }
 

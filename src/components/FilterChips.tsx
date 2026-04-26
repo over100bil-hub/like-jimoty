@@ -1,9 +1,13 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Prefecture, Attribute } from "@/types";
+import {
+  getCategoryFields,
+  type CategoryField,
+} from "@/lib/categoryFields";
 
 export default function FilterChips({
   prefectures,
@@ -20,6 +24,8 @@ export default function FilterChips({
   const [openDeal, setOpenDeal] = useState(false);
   const [openAttr, setOpenAttr] = useState(false);
   const [availableAttrs, setAvailableAttrs] = useState<Attribute[]>([]);
+  const [topCategorySlug, setTopCategorySlug] = useState<string | null>(null);
+  const [openRange, setOpenRange] = useState<string | null>(null);
   const supabase = createClient();
   const categorySlug = sp.get("category");
   const selectedAttrs = (sp.get("attrs") ?? "")
@@ -27,24 +33,53 @@ export default function FilterChips({
     .filter(Boolean)
     .map((s) => Number(s));
 
-  // 選択中カテゴリに紐づく属性をフェッチ
+  const dynamicFields: CategoryField[] = useMemo(
+    () => getCategoryFields(topCategorySlug),
+    [topCategorySlug]
+  );
+  const rangeFields = dynamicFields.filter(
+    (f) => f.type === "number" && f.filterable === "range"
+  );
+  const exactFields = dynamicFields.filter(
+    (f) =>
+      (f.type === "select" && f.filterable === "exact") ||
+      (f.type === "boolean" && f.filterable === "exact")
+  );
+
+  // 選択中カテゴリに紐づく属性＋大カテゴリslugを解決
   useEffect(() => {
     let cancelled = false;
     (async () => {
       if (!categorySlug) {
         setAvailableAttrs([]);
+        setTopCategorySlug(null);
         return;
       }
-      const { data: cat } = await supabase
+      // 全カテゴリを軽量取得して階層遡及
+      const { data: catsRaw } = await supabase
         .from("categories")
-        .select("id")
-        .eq("slug", categorySlug)
-        .maybeSingle();
-      if (!cat || cancelled) return;
+        .select("id,slug,parent_id");
+      if (cancelled) return;
+      const cats =
+        (catsRaw as { id: number; slug: string; parent_id: number | null }[]) ??
+        [];
+      let cur = cats.find((c) => c.slug === categorySlug) ?? null;
+      const startId = cur?.id ?? null;
+      while (cur?.parent_id) {
+        const parent = cats.find((c) => c.id === cur!.parent_id);
+        if (!parent) break;
+        cur = parent;
+      }
+      setTopCategorySlug(cur?.slug ?? null);
+
+      if (!startId) {
+        setAvailableAttrs([]);
+        return;
+      }
       const { data } = await supabase
         .from("category_attributes")
         .select("attributes(*)")
-        .eq("category_id", cat.id);
+        .eq("category_id", startId);
       if (cancelled) return;
       const rows = (data ?? []) as unknown as {
         attributes: Attribute | Attribute[] | null;
@@ -82,9 +117,11 @@ export default function FilterChips({
 
   const reset = () => router.push(pathname);
   const filterKeys = hidePrefecture
-    ? ["q", "category", "deal", "min", "max", "attrs"]
-    : ["q", "category", "prefecture", "deal", "min", "max", "attrs"];
-  const isFiltered = filterKeys.some((k) => sp.get(k));
+    ? ["q", "category", "deal", "min", "max", "attrs", "online"]
+    : ["q", "category", "prefecture", "deal", "min", "max", "attrs", "online"];
+  const isFiltered =
+    filterKeys.some((k) => sp.get(k)) ||
+    Array.from(sp.keys()).some((k) => k.startsWith("f_"));
 
   const toggleAttr = (id: number) => {
     const next = selectedAttrs.includes(id)
@@ -139,6 +176,58 @@ export default function FilterChips({
             onClick={() => setOpenAttr(true)}
           />
         )}
+
+        {/* カテゴリ別: 単一選択(select/boolean) */}
+        {exactFields.map((f) => {
+          const cur = sp.get(`f_${f.key}`);
+          const label =
+            f.type === "select" && cur
+              ? f.options.find((o) => o.value === cur)?.label ?? f.label
+              : f.label;
+          return (
+            <FilterPill
+              key={f.key}
+              label={cur ? `${f.label}: ${label}` : f.label}
+              active={!!cur}
+              onClick={() => setOpenRange(`exact:${f.key}`)}
+            />
+          );
+        })}
+
+        {/* カテゴリ別: 範囲フィルタ */}
+        {rangeFields.map((f) => {
+          const minV = sp.get(`f_${f.key}_min`);
+          const maxV = sp.get(`f_${f.key}_max`);
+          const active = !!(minV || maxV);
+          const unit = f.type === "number" ? f.unit ?? "" : "";
+          const labelText = active
+            ? `${f.label}: ${minV ?? "0"}〜${maxV ?? "上限なし"}${unit}`
+            : f.label;
+          return (
+            <FilterPill
+              key={f.key}
+              label={labelText}
+              active={active}
+              onClick={() => setOpenRange(`range:${f.key}`)}
+            />
+          );
+        })}
+
+        {/* オンライン決済 */}
+        {topCategorySlug && (
+          <FilterPill
+            label={
+              sp.get("online") === "true"
+                ? "オンライン決済のみ"
+                : "オンライン決済"
+            }
+            active={sp.get("online") === "true"}
+            onClick={() =>
+              update({ online: sp.get("online") === "true" ? null : "true" })
+            }
+          />
+        )}
+
         {isFiltered && (
           <button
             onClick={reset}
@@ -248,6 +337,86 @@ export default function FilterChips({
           </div>
         </Sheet>
       )}
+      {/* カテゴリ別: exact / range の動的シート */}
+      {openRange && (() => {
+        const [mode, key] = openRange.split(":");
+        const field = dynamicFields.find((f) => f.key === key);
+        if (!field) return null;
+        const close = () => setOpenRange(null);
+        return (
+          <Sheet onClose={close} title={field.label}>
+            {mode === "exact" && field.type === "select" && (
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => {
+                    update({ [`f_${key}`]: null });
+                    close();
+                  }}
+                  className={`pill ${
+                    !sp.get(`f_${key}`) ? "pill-active" : ""
+                  }`}
+                >
+                  すべて
+                </button>
+                {field.options.map((o) => (
+                  <button
+                    key={o.value}
+                    onClick={() => {
+                      update({ [`f_${key}`]: o.value });
+                      close();
+                    }}
+                    className={`pill ${
+                      sp.get(`f_${key}`) === o.value ? "pill-active" : ""
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {mode === "exact" && field.type === "boolean" && (
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => {
+                    update({ [`f_${key}`]: null });
+                    close();
+                  }}
+                  className={`pill ${
+                    !sp.get(`f_${key}`) ? "pill-active" : ""
+                  }`}
+                >
+                  指定なし
+                </button>
+                <button
+                  onClick={() => {
+                    update({ [`f_${key}`]: "true" });
+                    close();
+                  }}
+                  className={`pill ${
+                    sp.get(`f_${key}`) === "true" ? "pill-active" : ""
+                  }`}
+                >
+                  はい
+                </button>
+              </div>
+            )}
+            {mode === "range" && field.type === "number" && (
+              <RangeForm
+                unit={field.unit}
+                initialMin={sp.get(`f_${key}_min`) ?? ""}
+                initialMax={sp.get(`f_${key}_max`) ?? ""}
+                onApply={(min, max) => {
+                  update({
+                    [`f_${key}_min`]: min || null,
+                    [`f_${key}_max`]: max || null,
+                  });
+                  close();
+                }}
+              />
+            )}
+          </Sheet>
+        );
+      })()}
       {openPrice && (
         <Sheet onClose={() => setOpenPrice(false)} title="価格帯">
           <PriceForm
@@ -352,6 +521,48 @@ function PriceForm({
         onClick={() => onApply(min, max)}
         className="btn-primary w-full"
       >
+        適用
+      </button>
+    </div>
+  );
+}
+
+function RangeForm({
+  unit,
+  initialMin,
+  initialMax,
+  onApply,
+}: {
+  unit?: string;
+  initialMin: string;
+  initialMax: string;
+  onApply: (min: string, max: string) => void;
+}) {
+  const [min, setMin] = useState(initialMin);
+  const [max, setMax] = useState(initialMax);
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className="text-sm text-sub">下限{unit ? ` (${unit})` : ""}</span>
+          <input
+            type="number"
+            value={min}
+            onChange={(e) => setMin(e.target.value)}
+            className="input mt-1"
+          />
+        </label>
+        <label className="block">
+          <span className="text-sm text-sub">上限{unit ? ` (${unit})` : ""}</span>
+          <input
+            type="number"
+            value={max}
+            onChange={(e) => setMax(e.target.value)}
+            className="input mt-1"
+          />
+        </label>
+      </div>
+      <button onClick={() => onApply(min, max)} className="btn-primary w-full">
         適用
       </button>
     </div>
