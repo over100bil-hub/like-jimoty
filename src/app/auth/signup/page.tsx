@@ -74,7 +74,7 @@ function SignupInner() {
                 </span>
               </>
             ) : (
-              <>marche へようこそ！ホームに移動しています...</>
+              <>Machi-Chika へようこそ！ホームに移動しています...</>
             )}
           </p>
           <Link href="/auth/login" className="btn-outline inline-block mt-6">
@@ -88,7 +88,7 @@ function SignupInner() {
   return (
     <div className="max-w-md mx-auto px-4 py-12">
       <div className="bg-white rounded-card border border-line shadow-airbnb p-8">
-        <h1 className="text-2xl font-bold mb-1">marche へようこそ</h1>
+        <h1 className="text-2xl font-bold mb-1">Machi-Chika へようこそ</h1>
         <p className="text-sub mb-6 text-sm">アカウント作成は無料です</p>
         <form onSubmit={handleSignup} className="space-y-4">
           {error && (

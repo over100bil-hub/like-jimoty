@@ -1,11 +1,11 @@
-export const metadata = { title: "サービスについて | marche" };
+export const metadata = { title: "サービスについて | Machi-Chika" };
 
 export default function AboutPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 prose prose-neutral">
-      <h1 className="text-3xl font-bold mb-6">marche について</h1>
+      <h1 className="text-3xl font-bold mb-6">Machi-Chika について</h1>
       <p className="leading-relaxed">
-        marche は、地域の不用品・募集・サービスを無料で投稿・検索できる
+        Machi-Chika は、地域の不用品・募集・サービスを無料で投稿・検索できる
         コミュニティ型クラシファイドサービスです。
         身近な暮らしの中で生まれる「あげたい」「欲しい」「助けたい」を、
         誰もが手軽につなげられる場所を目指しています。

@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="border-t border-line bg-surface mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 text-sm text-sub">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>© 2026 marche</div>
+          <div>© 2026 Machi-Chika</div>
           <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link href="/about" className="hover:underline">
               サービスについて

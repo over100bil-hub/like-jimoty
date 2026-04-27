@@ -142,7 +142,7 @@ export default function Header() {
             >
               <path d="M16 1.39L19.95 9.41 28.8 10.7 22.4 17.07 23.9 26 16 21.78 8.1 26 9.6 17.07 3.2 10.7 12.05 9.41z" />
             </svg>
-            <span className="hidden sm:inline">marche</span>
+            <span className="hidden sm:inline">Machi-Chika</span>
           </Link>
 
           {/* 検索バー (PC) */}

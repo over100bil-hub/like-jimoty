@@ -3,7 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import PostForm from "@/components/PostForm";
 import type { Category, Prefecture, Post } from "@/types";
 
-export const metadata = { title: "投稿を編集 | marche" };
+export const metadata = { title: "投稿を編集 | Machi-Chika" };
 
 export default async function EditPostPage({
   params,

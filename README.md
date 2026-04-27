@@ -1,4 +1,4 @@
-# marche - 地域のマーケットプレイス
+# Machi-Chika - 地域のマーケットプレイス
 
 Airbnb 風 UI のクラシファイドサービス（Next.js 14 + Supabase）
 

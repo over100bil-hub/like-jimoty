@@ -43,7 +43,7 @@ function LoginInner() {
     <div className="max-w-md mx-auto px-4 py-12">
       <div className="bg-white rounded-card border border-line shadow-airbnb p-8">
         <h1 className="text-2xl font-bold mb-1">おかえりなさい</h1>
-        <p className="text-sub mb-6 text-sm">marche にログインします</p>
+        <p className="text-sub mb-6 text-sm">Machi-Chika にログインします</p>
         <form onSubmit={handleLogin} className="space-y-4">
           {error && (
             <div className="bg-accent-soft border border-accent text-accent rounded-xl p-3 text-sm">

@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Post, Profile } from "@/types";
 import PostCard from "@/components/PostCard";
 
-export const metadata = { title: "マイページ | marche" };
+export const metadata = { title: "マイページ | Machi-Chika" };
 
 export default async function MyPage({
   searchParams,

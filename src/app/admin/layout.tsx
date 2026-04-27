@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
-export const metadata = { title: "管理者 | marche" };
+export const metadata = { title: "管理者 | Machi-Chika" };
 
 export default async function AdminLayout({
   children,

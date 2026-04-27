@@ -36,9 +36,9 @@ export async function generateMetadata({
     .select("title, description, images")
     .eq("id", id)
     .single();
-  if (!post) return { title: "投稿が見つかりません | marche" };
+  if (!post) return { title: "投稿が見つかりません | Machi-Chika" };
   return {
-    title: `${post.title} | marche`,
+    title: `${post.title} | Machi-Chika`,
     description: post.description?.slice(0, 140),
     openGraph: {
       title: post.title,

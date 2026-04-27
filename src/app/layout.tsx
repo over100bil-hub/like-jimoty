@@ -5,11 +5,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Marche - 地域のマーケットプレイス",
+  title: "Machi-Chika - 地域のマーケットプレイス",
   description:
     "地域の不用品・募集・サービスを無料で投稿・検索できるクラシファイドサービス",
   openGraph: {
-    title: "Marche - 地域のマーケットプレイス",
+    title: "Machi-Chika - 地域のマーケットプレイス",
     description:
       "地域の不用品・募集・サービスを無料で投稿・検索できるクラシファイドサービス",
     type: "website",

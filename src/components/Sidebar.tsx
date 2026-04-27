@@ -66,7 +66,7 @@ export default function Sidebar({
           <GuideLink href={newPath("sell")} icon="💴" title="売ります" sub="値段をつけて出品する方法" />
           <GuideLink href={newPath("give")} icon="🎁" title="あげます" sub="無料でお譲りする方法" />
           <GuideLink href={newPath("wanted")} icon="🙋" title="求む" sub="欲しいものを募集する" />
-          <GuideLink href="/about" icon="📘" title="サービス紹介" sub="marcheの使い方" />
+          <GuideLink href="/about" icon="📘" title="サービス紹介" sub="Machi-Chikaの使い方" />
           <GuideLink href="/terms" icon="🛡️" title="利用規約" sub="安全に使うために" />
           <GuideLink href="/contact" icon="💬" title="お問い合わせ" sub="サポートに連絡する" />
         </ul>

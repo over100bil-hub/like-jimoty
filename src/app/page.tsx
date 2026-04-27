@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const revalidate = 300;
-export const metadata = { title: "都道府県を選ぶ | marche" };
+export const metadata = { title: "都道府県を選ぶ | Machi-Chika" };
 
 const REGION_ORDER = [
   "北海道",

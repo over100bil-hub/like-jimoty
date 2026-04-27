@@ -4,7 +4,7 @@ import Link from "next/link";
 import MessageThread from "./MessageThread";
 import type { Conversation, Message, Post, Profile } from "@/types";
 
-export const metadata = { title: "メッセージ | marche" };
+export const metadata = { title: "メッセージ | Machi-Chika" };
 export const revalidate = 0;
 
 export default async function ConversationPage({

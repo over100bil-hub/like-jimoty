@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import PostForm from "@/components/PostForm";
 import type { Category, Prefecture, DealType } from "@/types";
 
-export const metadata = { title: "投稿する | marche" };
+export const metadata = { title: "投稿する | Machi-Chika" };
 
 // type パラメータ → { categorySlug, deal_type, headline }
 const TYPE_PRESETS: Record<

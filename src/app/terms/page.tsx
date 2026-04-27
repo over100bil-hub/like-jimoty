@@ -1,11 +1,11 @@
-export const metadata = { title: "利用規約 | marche" };
+export const metadata = { title: "利用規約 | Machi-Chika" };
 
 export default function TermsPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 prose prose-neutral">
       <h1 className="text-3xl font-bold mb-6">利用規約</h1>
       <p className="text-sub">
-        本利用規約（以下「本規約」）は、marche（以下「本サービス」）の利用条件を定めるものです。
+        本利用規約（以下「本規約」）は、Machi-Chika（以下「本サービス」）の利用条件を定めるものです。
       </p>
       <h2 className="text-xl font-bold mt-6">1. 利用登録</h2>
       <p>本サービスの利用には、メールアドレスによる登録が必要です。</p>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Post } from "@/types";
 import PostCard from "@/components/PostCard";
 
-export const metadata = { title: "お気に入り | marche" };
+export const metadata = { title: "お気に入り | Machi-Chika" };
 export const revalidate = 0;
 
 export default async function FavoritesPage() {

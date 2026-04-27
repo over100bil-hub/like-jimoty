@@ -1,11 +1,11 @@
-export const metadata = { title: "プライバシーポリシー | marche" };
+export const metadata = { title: "プライバシーポリシー | Machi-Chika" };
 
 export default function PrivacyPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 prose prose-neutral">
       <h1 className="text-3xl font-bold mb-6">プライバシーポリシー</h1>
       <p>
-        marche（以下「当社」）は、ユーザーの個人情報の保護を最優先とし、
+        Machi-Chika（以下「当社」）は、ユーザーの個人情報の保護を最優先とし、
         個人情報保護法および関連法令を遵守します。
       </p>
       <h2 className="text-xl font-bold mt-6">取得する情報</h2>

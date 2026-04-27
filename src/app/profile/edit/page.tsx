@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import ProfileForm from "./ProfileForm";
 import type { Profile, Prefecture } from "@/types";
 
-export const metadata = { title: "プロフィール編集 | marche" };
+export const metadata = { title: "プロフィール編集 | Machi-Chika" };
 
 export default async function ProfileEditPage() {
   const supabase = await createClient();

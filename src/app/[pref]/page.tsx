@@ -48,8 +48,8 @@ export async function generateMetadata({
     .maybeSingle();
   return {
     title: data?.name
-      ? `${data.name}の投稿一覧 | marche`
-      : "投稿一覧 | marche",
+      ? `${data.name}の投稿一覧 | Machi-Chika`
+      : "投稿一覧 | Machi-Chika",
   };
 }
 
