@@ -145,12 +145,20 @@ export default function FilterChips({
         )}
         <FilterPill
           label={
-            sp.get("deal") === "give"
+            sp.get("deal") === "give" || sp.get("deal") === "free"
               ? "あげます"
               : sp.get("deal") === "wanted"
               ? "求む"
               : sp.get("deal") === "sell"
               ? "売ります"
+              : sp.get("deal") === "job"
+              ? "求人"
+              : sp.get("deal") === "community"
+              ? "助けてほしい"
+              : sp.get("deal") === "shop"
+              ? "店舗PR"
+              : sp.get("deal") === "members"
+              ? "メンバー募集"
               : "取引タイプ"
           }
           active={!!sp.get("deal")}
@@ -275,6 +283,10 @@ export default function FilterChips({
               { v: "sell", l: "売ります" },
               { v: "give", l: "あげます" },
               { v: "wanted", l: "求む" },
+              { v: "job", l: "求人" },
+              { v: "community", l: "助けてほしい" },
+              { v: "shop", l: "店舗PR" },
+              { v: "members", l: "メンバー募集" },
             ].map((o) => (
               <button
                 key={o.v ?? "all"}

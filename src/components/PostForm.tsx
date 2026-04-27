@@ -85,6 +85,24 @@ export default function PostForm({
     [topSlug]
   );
 
+  // カテゴリ変更時、現在のdealTypeがそのカテゴリに合わない場合は自動補正
+  useEffect(() => {
+    if (!topSlug) return;
+    const allowed: Record<string, DealType[]> = {
+      jobs: ["job"],
+      localshop: ["shop"],
+      community: ["community"],
+      members: ["members"],
+      lesson: ["lesson"],
+      foster: ["foster"],
+    };
+    const list = allowed[topSlug];
+    if (list && !list.includes(dealType)) {
+      setDealType(list[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topSlug]);
+
   const setAttrValue = (key: string, value: unknown) =>
     setAttrs((prev) => {
       const next = { ...prev };
@@ -409,27 +427,50 @@ export default function PostForm({
         </Field>
       </div>
 
-      {/* 売ります系のみ: 取引タイプ */}
-      {isSaleCategory && (
-        <Field label="取引タイプ" required>
-          <div className="flex flex-wrap gap-2">
-            {[
+      {/* 取引タイプ：カテゴリ別に候補を切替 */}
+      {(() => {
+        const dealOptions: { v: DealType; l: string }[] = isSaleCategory
+          ? [
               { v: "sell", l: "売ります" },
               { v: "give", l: "あげます" },
               { v: "wanted", l: "求む" },
-            ].map((o) => (
-              <button
-                type="button"
-                key={o.v}
-                onClick={() => setDealType(o.v as DealType)}
-                className={`pill ${dealType === o.v ? "pill-active" : ""}`}
-              >
-                {o.l}
-              </button>
-            ))}
-          </div>
-        </Field>
-      )}
+            ]
+          : topSlug === "jobs"
+          ? [{ v: "job", l: "求人" }]
+          : topSlug === "localshop"
+          ? [{ v: "shop", l: "店舗PR" }]
+          : topSlug === "community"
+          ? [{ v: "community", l: "助けてほしい" }]
+          : topSlug === "members"
+          ? [{ v: "members", l: "メンバー募集" }]
+          : topSlug === "lesson"
+          ? [{ v: "lesson", l: "教室" }]
+          : topSlug === "foster"
+          ? [{ v: "foster", l: "里親募集" }]
+          : topSlug === "realestate"
+          ? [
+              { v: "sell", l: "売ります" },
+              { v: "wanted", l: "求む" },
+            ]
+          : [];
+        if (dealOptions.length === 0) return null;
+        return (
+          <Field label="取引タイプ" required>
+            <div className="flex flex-wrap gap-2">
+              {dealOptions.map((o) => (
+                <button
+                  type="button"
+                  key={o.v}
+                  onClick={() => setDealType(o.v)}
+                  className={`pill ${dealType === o.v ? "pill-active" : ""}`}
+                >
+                  {o.l}
+                </button>
+              ))}
+            </div>
+          </Field>
+        );
+      })()}
 
       {showConditionField && (
         <Field label="商品状態">

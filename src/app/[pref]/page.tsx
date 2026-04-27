@@ -253,17 +253,20 @@ export default async function PrefHomePage({
         <FilterChips prefectures={prefectures} hidePrefecture />
       </Suspense>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6">
-        {list.length === 0 ? (
-          <EmptyState prefSlug={prefSlug} />
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-8">
-            {list.map((p) => (
-              <PostCard key={p.id} post={p} prefSlug={prefSlug} />
-            ))}
-          </div>
-        )}
-      </div>
+      {/* 検索条件あり（カテゴリ/キーワード/取引タイプ/価格）時のみ投稿リストを表示 */}
+      {(sp.category || sp.q || sp.deal || sp.min || sp.max) && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6">
+          {list.length === 0 ? (
+            <EmptyState prefSlug={prefSlug} />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-8">
+              {list.map((p) => (
+                <PostCard key={p.id} post={p} prefSlug={prefSlug} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="border-t border-line bg-surface/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10">

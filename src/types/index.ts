@@ -35,7 +35,17 @@ export type Prefecture = {
   region?: string | null;
 };
 
-export type DealType = "sell" | "give" | "wanted";
+export type DealType =
+  | "sell"
+  | "give"
+  | "wanted"
+  | "job"
+  | "community"
+  | "shop"
+  | "members"
+  | "free"
+  | "lesson"
+  | "foster";
 export type PostStatus = "active" | "closed" | "deleted";
 
 export type Post = {
